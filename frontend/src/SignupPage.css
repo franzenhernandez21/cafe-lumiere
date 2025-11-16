@@ -1,0 +1,302 @@
+/* === Main Container === */
+.signup-page {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  background-color: #f7f2e9;
+  font-family: "Poppins", sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === Right Side Image === */
+.right-side {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.right-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: fadeInRight 1.2s ease forwards;
+}
+
+@keyframes fadeInRight {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* === Signup Form === */
+.signup-form {
+  width: 380px;
+  text-align: center;
+  margin-left: 9%;
+  padding: 45px 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(180, 138, 96, 0.35);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 1s ease-in-out;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Logo === */
+.logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 25px;
+  animation: floatLogo 3s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* === Subtitle === */
+.subtitle {
+  color: #6c5647;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+}
+
+/* === Input Fields (Brown Glass Style) === */
+.glass-input {
+  display: block;
+  width: 100%;
+  margin: 12px 0;
+  padding: 15px 18px;
+  font-size: 1rem;
+  color: #5a3e2b;
+  border: 2px solid rgba(180, 138, 96, 0.7);
+  border-radius: 14px;
+  background: rgba(255, 250, 240, 0.6);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 8px rgba(180, 138, 96, 0.15),
+              0 6px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.glass-input::placeholder {
+  color: #a1836b;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #b48a60;
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(180, 138, 96, 0.5),
+              inset 0 0 5px rgba(180, 138, 96, 0.2);
+}
+
+.glass-input:hover {
+  box-shadow: 0 0 8px rgba(180, 138, 96, 0.3);
+}
+
+/* === Signup Button === */
+.signup-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 0;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #b48a60, #a3744d);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(180, 138, 96, 0.35);
+  transition: all 0.3s ease;
+}
+
+.signup-btn:hover {
+  background: linear-gradient(135deg, #a3744d, #8c5c36);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(163, 116, 77, 0.4);
+}
+
+/* === Login Redirect === */
+.login-text {
+  margin-top: 25px;
+  color: #6c5647;
+  font-size: 0.95rem;
+}
+
+.login-link {
+  color: #b48a60;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: #a3744d;
+}
+
+/* === Responsive Buttons (for mobile and tablet) === */
+@media (max-width: 768px) {
+  .btn,
+  .order-btn,
+  .browse-btn,
+  .login-btn,
+  .signup-btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn,
+  .order-btn,
+  .browse-btn,
+  .login-btn,
+  .signup-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+}
+
+/* === RESPONSIVE DESIGN FOR SIGNUP PAGE === */
+
+/* Tablets and smaller screens */
+@media (max-width: 1024px) {
+  .right-side {
+    width: 45vw;
+  }
+
+  .signup-form {
+    margin-left: 5%;
+    width: 340px;
+    padding: 35px 30px;
+  }
+
+  .logo {
+    width: 150px;
+  }
+}
+
+/* Tablets portrait and large phones */
+@media (max-width: 768px) {
+  .signup-page {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .right-side {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    margin-bottom: 20px;
+  }
+
+  .right-side img {
+    object-fit: cover;
+    height: 100%;
+  }
+
+  .signup-form {
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 35px 25px;
+  }
+
+  .logo {
+    width: 140px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .glass-input {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+  }
+
+  .signup-btn {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .signup-page {
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20px;
+  }
+
+  .right-side {
+    display: none; /* hide image on small phones */
+  }
+
+  .signup-form {
+    width: 90%;
+    padding: 25px 20px;
+    margin: 0 auto;
+    border-radius: 16px;
+  }
+
+  .logo {
+    width: 120px;
+    margin-bottom: 15px;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+  }
+
+  .glass-input {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .signup-btn {
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .login-text {
+    font-size: 0.85rem;
+  }
+}

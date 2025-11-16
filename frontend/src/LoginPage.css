@@ -1,0 +1,283 @@
+/* === Main Container === */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 100vh;
+  background-color: #f7f2e9;
+  font-family: "Poppins", sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === Left Side Image Section === */
+.left-side {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.left-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: fadeInLeft 1.2s ease forwards;
+}
+
+@keyframes fadeInLeft {
+  from {
+    transform: translateX(-40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* === Login Form Box === */
+.login-form {
+  width: 380px;
+  text-align: center;
+  margin-right: 9%;
+  padding: 45px 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(180, 138, 96, 0.35);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 1s ease-in-out;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Logo === */
+.logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 25px;
+  animation: floatLogo 3s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* === Subtitle === */
+.subtitle {
+  color: #6c5647;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+}
+
+/* === Input Fields === */
+.glass-input {
+  display: block;
+  width: 100%;
+  margin: 12px 0;
+  padding: 15px 18px;
+  font-size: 1rem;
+  color: #5a3e2b;
+  border: 2px solid rgba(180, 138, 96, 0.7);
+  border-radius: 14px;
+  background: rgba(255, 250, 240, 0.6);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 8px rgba(180, 138, 96, 0.15),
+              0 6px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.glass-input::placeholder {
+  color: #a1836b;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #b48a60;
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(180, 138, 96, 0.5),
+              inset 0 0 5px rgba(180, 138, 96, 0.2);
+}
+
+.glass-input:hover {
+  box-shadow: 0 0 8px rgba(180, 138, 96, 0.3);
+}
+
+/* === Login Button === */
+.login-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 0;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #b48a60, #a3744d);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(180, 138, 96, 0.35);
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, #a3744d, #8c5c36);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(163, 116, 77, 0.4);
+}
+
+/* === Forgot Password === */
+.forgot {
+  display: block;
+  text-align: right;
+  width: 100%;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #7b6654;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot:hover {
+  color: #b48a60;
+}
+
+/* === Signup Section === */
+.signup-text {
+  margin-top: 25px;
+  color: #6c5647;
+  font-size: 0.95rem;
+}
+
+.signup-link {
+  color: #b48a60;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+  color: #a3744d;
+}
+
+/* === Responsive Design === */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .left-side {
+    width: 45vw;
+  }
+
+  .left-side img {
+    object-fit: contain; /* no zoom */
+  }
+
+  .login-form {
+    margin-right: 5%;
+    width: 340px;
+    padding: 35px 30px;
+  }
+
+  .logo {
+    width: 150px;
+  }
+}
+
+/* Tablets portrait / large phones */
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .left-side {
+    position: relative;
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+  }
+
+  .left-side img {
+    width: 100%;
+    height: auto;
+    object-fit: contain; /* fix zoom */
+    max-height: 280px;
+  }
+
+  .login-form {
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 35px 25px;
+  }
+
+  .logo {
+    width: 140px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .login-page {
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20px;
+  }
+
+  .left-side {
+    display: none; /* hide image */
+  }
+
+  .login-form {
+    width: 90%;
+    padding: 25px 20px;
+    margin: 0 auto;
+    border-radius: 16px;
+  }
+
+  .logo {
+    width: 120px;
+    margin-bottom: 15px;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+  }
+
+  .login-btn {
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .signup-text {
+    font-size: 0.85rem;
+  }
+}
