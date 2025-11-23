@@ -5,6 +5,8 @@ import "./profile.css";
 
 function Profile() {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSection, setActiveSection] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -19,21 +21,77 @@ function Profile() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  if (!storedUser) {
-    navigate("/login");
-    return;
-  }
+  // Toast notification state
+  const [toasts, setToasts] = useState([]);
 
-  // ✅ FIX: Use _id consistently
-  const userId = storedUser._id;
-  console.log("👤 User ID:", userId); // Debug log
-  
-  fetchUser(userId);
-  fetchOrders(userId);
-  fetchCart(userId);
-}, [navigate]);
+  // Toast notification function
+  const showToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 4000);
+  };
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    // Fetch products for search suggestions
+    axios
+      .get("http://localhost:5000/api/products")
+      .then((res) => {
+        const productArray = res.data.products || res.data || [];
+        setProducts(productArray);
+      })
+      .catch((err) => console.error("Fetch products error:", err));
+
+    const userId = storedUser._id;
+    console.log("👤 User ID:", userId);
+    
+    fetchUser(userId);
+    fetchOrders(userId);
+    fetchCart(userId);
+  }, [navigate]);
+
+  // Search suggestions logic
+  const searchSuggestions = searchQuery.trim()
+    ? products.filter(product =>
+        product.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 5)
+    : [];
+
+  const handleSuggestionClick = (product) => {
+    setSearchQuery("");
+    setShowSuggestions(false);
+    navigate(`/product/${product._id}`);
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+    setShowSuggestions(true);
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+    if (searchQuery.trim()) setShowSuggestions(true);
+  };
+
+  const handleSearchBlur = () => {
+    setIsSearchFocused(false);
+    setTimeout(() => setShowSuggestions(false), 300);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchQuery)}`);
+      setShowSuggestions(false);
+    }
+  };
 
   const fetchUser = async (userId) => {
     try {
@@ -52,6 +110,7 @@ function Profile() {
       }
     } catch (error) {
       console.error("Fetch user error:", error);
+      showToast("Failed to load user data", "error");
     } finally {
       setLoading(false);
     }
@@ -63,6 +122,7 @@ function Profile() {
       setOrders(res.data.orders || []);
     } catch (error) {
       console.error("Fetch orders error:", error);
+      showToast("Failed to load orders", "error");
     }
   };
 
@@ -94,20 +154,14 @@ function Profile() {
       });
 
       if (res.data.success) {
-        alert("Profile updated successfully!");
+        showToast("Profile updated successfully! ✨", "success");
         setIsEditing(false);
       } else {
-        alert("Failed to update profile.");
+        showToast("Failed to update profile", "error");
       }
     } catch (error) {
       console.error("Save error:", error);
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/?search=${encodeURIComponent(searchQuery)}`);
+      showToast("An error occurred while updating profile", "error");
     }
   };
 
@@ -120,8 +174,10 @@ function Profile() {
         quantity: newQuantity,
       });
       fetchCart(userId);
+      showToast("Cart updated successfully", "success");
     } catch (error) {
       console.error("Update quantity error:", error);
+      showToast("Failed to update quantity", "error");
     }
   };
 
@@ -132,8 +188,10 @@ function Profile() {
         const userId = storedUser.id || storedUser._id;
         await axios.delete(`http://localhost:5000/api/cart/${userId}/item/${productId}`);
         fetchCart(userId);
+        showToast("Item removed from cart", "success");
       } catch (error) {
         console.error("Remove item error:", error);
+        showToast("Failed to remove item", "error");
       }
     }
   };
@@ -172,12 +230,31 @@ function Profile() {
 
   return (
     <div className="profile-page">
-      {/* ===== HEADER ===== */}
+      {/* Toast Notifications Container */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
+            <div className="toast-icon">
+              {toast.type === 'success' ? '✓' : '✕'}
+            </div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ===== HEADER WITH LOGO ===== */}
       <header className="header">
+        {/* Logo Section */}
+        <div className="header-logo" onClick={() => navigate("/userhomepage")}>
+          <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="logo-image" />
+          <span className="logo-text">Café Lumière</span>
+        </div>
+
+        {/* Navigation */}
         <nav className="navbar">
           <a onClick={() => navigate("/userhomepage")}>Home</a>
-          <a onClick={() => navigate("/blogs")}>Blogs</a>
           <a onClick={() => navigate("/aboutus")}>About Us</a>
+          <a onClick={() => navigate("/contact")}>Contact Us</a>
         </nav>
 
         <div className="header-right">
@@ -186,9 +263,9 @@ function Profile() {
               type="text" 
               placeholder="Search for coffee, pastries..." 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
+              onChange={handleSearchInputChange}
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
             />
             <button type="submit" className="search-button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -196,6 +273,39 @@ function Profile() {
                 <path d="m21 21-4.35-4.35"/>
               </svg>
             </button>
+
+            {/* Search Suggestions */}
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <div className="search-suggestions">
+                {searchSuggestions.map((product) => (
+                  <div
+                    key={product._id}
+                    className="search-suggestion-item"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSuggestionClick(product);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <img
+                      src={
+                        product.image
+                          ? product.image.startsWith("http")
+                            ? product.image
+                            : `http://localhost:5000/${product.image}`
+                          : "/image/placeholder.png"
+                      }
+                      alt={product.name}
+                      className="suggestion-image"
+                    />
+                    <div className="suggestion-details">
+                      <span className="suggestion-name">{product.name}</span>
+                      <span className="suggestion-price">₱{product.price?.toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </form>
 
           <button
@@ -203,7 +313,7 @@ function Profile() {
             onClick={() => navigate("/profile")}
             title="Profile"
           >
-            <img src="/image/pfpicon.png" alt="Profile" />
+            <img src="/image/profileto.png" alt="Profile" />
           </button>
 
           <button
@@ -211,7 +321,7 @@ function Profile() {
             onClick={() => navigate("/cart")}
             title="Cart"
           >
-            <img src="/image/carticon.png" alt="Cart" />
+            <img src="/image/cartto.png" alt="Cart" />
             {cartItems.length > 0 && <span className="cart-badge">{cartItems.length}</span>}
           </button>
         </div>
@@ -324,7 +434,8 @@ function Profile() {
             <button className="nav-item logout-item" onClick={() => {
               localStorage.removeItem("user");
               localStorage.removeItem("token");
-              navigate("/login");
+              showToast("Logged out successfully", "success");
+              setTimeout(() => navigate("/login"), 1000);
             }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -636,12 +747,15 @@ function Profile() {
         </main>
       </div>
 
-      {/* ===== FOOTER SECTION ===== */}
+      {/* ===== FOOTER WITH LOGO ===== */}
       <footer className="footer-section">
         <div className="footer-container">
           <div className="footer-content">
             <div className="footer-column">
-              <h3 className="footer-logo">Café Lumière</h3>
+              <div className="footer-logo-section">
+                <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="footer-logo-image" />
+                <h3 className="footer-logo">Café Lumière</h3>
+              </div>
               <p className="footer-tagline">Living the Coffee Life, One Cup at a Time</p>
               <p className="footer-description">
                 Experience the perfect blend of ambiance, quality, and community at our specialty café.

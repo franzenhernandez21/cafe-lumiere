@@ -10,8 +10,16 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   address: { type: String },
   birthday: { type: String },
-   resetPasswordToken: { type: String },
+  status: { type: String, default: "active" }, // "active" or "blocked"
+  resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
+   promoCode: {
+    code: { type: String },
+    lastClaimed: { type: Date },
+    timesUsed: { type: Number, default: 0 }
+  }
 }, { timestamps: true });
+
+
 
 module.exports = mongoose.model("User", userSchema);

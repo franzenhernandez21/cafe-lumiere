@@ -12,17 +12,35 @@ const AdminProductManagement = () => {
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  // ✅ Notification Helper
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  // ✅ Subcategory options based on selected category
+  const subcategoryOptions = {
+    "Coffee": ["Hot", "Cold"],
+    "Cakes": ["Flavors", "Occasional"],
+    "Cupcake": ["Classic", "Packs"],
+    "Pie": ["Fruits", "Cream/Custard"],
+    "Gifting": ["Seasonal", "Bundle"]
+  };
 
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
-    category: "coffee",
+    category: "",
+    subcategory: "",
     stock: "",
     image: null,
   });
 
-  // ✅ Fetch categories from backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -36,7 +54,6 @@ const AdminProductManagement = () => {
     fetchCategories();
   }, []);
 
-  // ===== Fetch products =====
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -54,7 +71,7 @@ const AdminProductManagement = () => {
       setFilteredProducts(productData);
     } catch (err) {
       console.error("❌ Error fetching products:", err);
-      alert("❌ Failed to load products. Check if backend is running.");
+      showNotification("error", "Failed to load products. Check if backend is running.");
     } finally {
       setLoading(false);
     }
@@ -69,7 +86,8 @@ const AdminProductManagement = () => {
       (p) =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.description?.toLowerCase().includes(query.toLowerCase()) ||
-        (p.category?.toLowerCase() || "").includes(query.toLowerCase())
+        (p.category?.name?.toLowerCase() || "").includes(query.toLowerCase()) ||
+        (p.subcategory?.toLowerCase() || "").includes(query.toLowerCase())
     );
     setFilteredProducts(filtered);
   };
@@ -80,7 +98,8 @@ const AdminProductManagement = () => {
       name: "",
       description: "",
       price: "",
-      category: "coffee",
+      category: "",
+      subcategory: "",
       stock: "",
       image: null,
     });
@@ -94,14 +113,14 @@ const AdminProductManagement = () => {
       name: product.name,
       description: product.description || "",
       price: product.price,
-      category: product.category || "coffee",
+      category: product.category._id || "",
+      subcategory: product.subcategory || "",
       stock: product.stock || 0,
       image: null,
     });
     setShowModal(true);
   };
 
-  // ===== Submit Form =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -112,6 +131,7 @@ const AdminProductManagement = () => {
       formData.append("description", form.description);
       formData.append("price", form.price);
       formData.append("category", form.category);
+      formData.append("subcategory", form.subcategory);
       formData.append("stock", form.stock);
       if (form.image) formData.append("image", form.image);
 
@@ -122,44 +142,74 @@ const AdminProductManagement = () => {
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-        alert("✅ Product updated successfully!");
+        showNotification("success", "Product updated successfully!");
       } else {
         response = await axios.post(
           "http://localhost:5000/api/products",
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-        alert("✅ Product added successfully!");
+        showNotification("success", "Product added successfully!");
       }
 
       setShowModal(false);
       fetchProducts();
     } catch (err) {
       console.error("❌ Error submitting form:", err);
-      alert(err.response?.data?.error || "❌ Something went wrong!");
+      showNotification("error", err.response?.data?.error || "Something went wrong!");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Delete this product?")) {
-      try {
-        setLoading(true);
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
-        alert("✅ Product deleted successfully!");
-        fetchProducts();
-      } catch (err) {
-        console.error("❌ Delete error:", err);
-        alert(`❌ Error deleting product: ${err.response?.data?.error || err.message}`);
-      } finally {
-        setLoading(false);
-      }
+    try {
+      setLoading(true);
+      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      showNotification("success", "Product deleted successfully!");
+      fetchProducts();
+      setShowDeleteConfirm(false);
+      setProductToDelete(null);
+    } catch (err) {
+      console.error("❌ Delete error:", err);
+      showNotification("error", `Error deleting product: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product);
+    setShowDeleteConfirm(true);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setProductToDelete(null);
+  };
+
+  const getCategoryName = (categoryId) => {
+    const cat = categories.find(c => c._id === categoryId);
+    return cat?.name;
+  };
+
+  const availableSubcategories = getCategoryName(form.category) 
+    ? subcategoryOptions[getCategoryName(form.category)] || [] 
+    : [];
+
   return (
     <div className="admin-container">
+      {/* ✅ Notification Toast */}
+      {notification && (
+        <div className={`product-notification ${notification.type}`}>
+          <div className="product-notification-icon">
+            {notification.type === "success" ? "✓" : "✕"}
+          </div>
+          <p className="product-notification-message">{notification.message}</p>
+          <button className="product-notification-close" onClick={() => setNotification(null)}>×</button>
+        </div>
+      )}
+
       <div className="admin-header">
         <h2 className="admin-title">Product Management</h2>
         <button onClick={openAddModal} className="add-button" disabled={loading}>
@@ -167,12 +217,11 @@ const AdminProductManagement = () => {
         </button>
       </div>
 
-      {/* Search */}
       <div className="search-container">
-        <span className="search-icon"></span>
+        <span className="search-icon">🔍</span>
         <input
           type="text"
-          placeholder="Search products by name, description, or category..."
+          placeholder="Search products by name, description, category, or subcategory..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
@@ -185,7 +234,6 @@ const AdminProductManagement = () => {
         )}
       </div>
 
-      {/* Product Grid */}
       <div className="product-grid">
         {filteredProducts.length === 0 && !loading ? (
           <div className="empty-state">
@@ -224,7 +272,7 @@ const AdminProductManagement = () => {
                     <button onClick={() => openEditModal(p)} className="edit-button">
                       ✏️ Edit
                     </button>
-                    <button onClick={() => handleDelete(p._id)} className="delete-button">
+                    <button onClick={() => handleDeleteClick(p)} className="delete-button">
                       🗑️ Delete
                     </button>
                   </div>
@@ -238,146 +286,248 @@ const AdminProductManagement = () => {
                   <span className="product-stock">Stock: {p.stock || 0}</span>
                 </div>
                 <span className="category-badge">{p.category?.name || "No category"}</span>
+                {p.subcategory && (
+                  <span className="subcategory-badge">{p.subcategory}</span>
+                )}
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Modal */}
+      {/* Enhanced Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {editMode ? "✏️ Edit Product" : "Add New Product"}
-              </h3>
+        <div className="modal-overlay-enhanced" onClick={() => setShowModal(false)}>
+          <div className="modal-enhanced-product" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-cafe">
+              <div className="cafe-brand-header">
+                <span className="cafe-name-product">Cafe Lumière ☕</span>
+                <span className="modal-subtitle-product">
+                  {editMode ? "Edit Product" : "Add New Product"}
+                </span>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="close-button"
+                className="close-button-cafe"
                 disabled={loading}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-group">
-                <label className="form-label">Product Name *</label>
-                <input
-                  type="text"
-                  placeholder="Enter product name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="form-input"
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Description</label>
-                <textarea
-                  placeholder="Enter product description"
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
-                  className="form-textarea"
-                  rows="3"
-                  disabled={loading}
-                />
-              </div>
-
-              {/* ✅ Category Dropdown (with default + DB categories) */}
-              <div className="form-group">
-                <label className="form-label">Category *</label>
-                <select
-  value={form.category}
-  onChange={(e) => setForm({ ...form, category: e.target.value })}
-  className="form-select"
-  required
-  disabled={loading}
->
-  <option value="">Select category</option>
-
-  {/* ✅ Dynamically fetched categories from DB */}
-  {categories.length > 0 ? (
-    categories.map((cat) => (
-      <option key={cat._id} value={cat._id}>
-        {cat.name}
-      </option>
-    ))
-  ) : (
-    <option disabled>No categories available</option>
-  )}
-</select>
-
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Price *</label>
+            <form onSubmit={handleSubmit} className="modal-form-cafe">
+              <div className="form-section">
+                <h4 className="section-title">PRODUCT INFORMATION</h4>
+                
+                <div className="form-group-cafe">
+                  <label className="form-label-cafe">Product Name *</label>
                   <input
-                    type="number"
-                    placeholder="0.00"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    className="form-input"
-                    step="0.01"
-                    min="0"
+                    type="text"
+                    placeholder="Enter product name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="form-input-cafe"
                     required
                     disabled={loading}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Stock *</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={form.stock}
-                    onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                    className="form-input"
-                    min="0"
-                    required
+                <div className="form-group-cafe">
+                  <label className="form-label-cafe">Description</label>
+                  <textarea
+                    placeholder="Enter product description"
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    className="form-textarea-cafe"
+                    rows="3"
                     disabled={loading}
                   />
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label className="form-label">Product Image</label>
-                <input
-                  type="file"
-                  onChange={(e) =>
-                    setForm({ ...form, image: e.target.files[0] })
-                  }
-                  accept="image/*"
-                  className="form-file-input"
-                  disabled={loading}
-                />
-                {form.image && (
-                  <p style={{ marginTop: "8px", fontSize: "14px", color: "#666" }}>
-                    📎 Selected: {form.image.name}
-                  </p>
+                <div className="form-group-cafe">
+                  <label className="form-label-cafe">Category *</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: "" })}
+                    className="form-select-cafe"
+                    required
+                    disabled={loading}
+                  >
+                    <option value="">Select category</option>
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No categories available</option>
+                    )}
+                  </select>
+                </div>
+
+                {availableSubcategories.length > 0 && (
+                  <div className="form-group-cafe">
+                    <label className="form-label-cafe">Sub-Category</label>
+                    <select
+                      value={form.subcategory}
+                      onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
+                      className="form-select-cafe"
+                      disabled={loading}
+                    >
+                      <option value="">Select sub-category (optional)</option>
+                      {availableSubcategories.map((sub) => (
+                        <option key={sub} value={sub}>
+                          {sub}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 )}
+
+                <div className="form-row-cafe">
+                  <div className="form-group-cafe">
+                    <label className="form-label-cafe">Price *</label>
+                    <div className="input-with-prefix">
+                      <span className="currency-symbol">₱</span>
+                      <input
+                        type="number"
+                        placeholder="0.00"
+                        value={form.price}
+                        onChange={(e) => setForm({ ...form, price: e.target.value })}
+                        className="form-input-cafe price-input"
+                        step="0.01"
+                        min="0"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group-cafe">
+                    <label className="form-label-cafe">Stock *</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={form.stock}
+                      onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                      className="form-input-cafe"
+                      min="0"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-cafe">
+                  <label className="form-label-cafe">Product Image</label>
+                  <div className="file-upload-wrapper">
+                    <input
+                      type="file"
+                      onChange={(e) =>
+                        setForm({ ...form, image: e.target.files[0] })
+                      }
+                      accept="image/*"
+                      className="form-file-input-cafe"
+                      id="file-input"
+                      disabled={loading}
+                    />
+                    <label htmlFor="file-input" className="file-upload-label">
+                      <span className="file-icon">📎</span>
+                      {form.image ? form.image.name : "Choose a file"}
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer-cafe">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="cancel-button"
+                  className="cancel-button-cafe"
                   disabled={loading}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="submit-button" disabled={loading}>
+                <button type="submit" className="submit-button-cafe" disabled={loading}>
                   {loading ? "⏳ Saving..." : editMode ? "Update Product" : "Add Product"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && productToDelete && (
+        <div className="modal-overlay-enhanced" onClick={cancelDelete}>
+          <div className="modal-enhanced-simple delete-modal-product" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-simple">
+              <div>
+                <div className="modal-title-simple">Confirm Delete</div>
+                <div className="modal-subtitle-delete">This action cannot be undone</div>
+              </div>
+              <button
+                className="close-btn-simple"
+                onClick={cancelDelete}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body-enhanced">
+              <div className="delete-confirm-content">
+                <p className="delete-message">
+                  Are you sure you want to delete this product?
+                </p>
+                
+                <div className="delete-product-info">
+                  <div className="delete-info-row">
+                    <span className="delete-info-label">Product Name:</span>
+                    <span className="delete-info-value">{productToDelete.name}</span>
+                  </div>
+                  <div className="delete-info-row">
+                    <span className="delete-info-label">Category:</span>
+                    <span className="delete-info-value">
+                      {productToDelete.category?.name || "No category"}
+                    </span>
+                  </div>
+                  {productToDelete.subcategory && (
+                    <div className="delete-info-row">
+                      <span className="delete-info-label">Sub-Category:</span>
+                      <span className="delete-info-value">{productToDelete.subcategory}</span>
+                    </div>
+                  )}
+                  <div className="delete-info-row">
+                    <span className="delete-info-label">Price:</span>
+                    <span className="delete-info-value">₱{productToDelete.price}</span>
+                  </div>
+                  <div className="delete-info-row">
+                    <span className="delete-info-label">Stock:</span>
+                    <span className="delete-info-value">{productToDelete.stock || 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="delete-actions">
+                <button
+                  onClick={() => handleDelete(productToDelete._id)}
+                  className="confirm-delete-btn"
+                  disabled={loading}
+                >
+                  {loading ? "Deleting..." : "OK"}
+                </button>
+                <button
+                  onClick={cancelDelete}
+                  className="cancel-delete-btn"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

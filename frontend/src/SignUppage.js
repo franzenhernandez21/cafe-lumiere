@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Import this
+import { useNavigate } from "react-router-dom";
 import "./SignupPage.css";
 
 const SignupPage = () => {
@@ -10,11 +10,16 @@ const SignupPage = () => {
     password: "",
   });
 
-  const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // ✅ Define this here
+  const [notification, setNotification] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const handleSubmit = async (e) => {
@@ -22,28 +27,45 @@ const SignupPage = () => {
 
     try {
       const res = await fetch("http://localhost:5000/api/users/signup", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(formData),
-});
-
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       const data = await res.json();
 
       if (data.success) {
-        setMessage("✅ Signup successful! Redirecting...");
-        setTimeout(() => navigate("/login"), 2000); // ✅ Redirects after 2 sec
+        showNotification("success", "Signup successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 2000);
       } else {
-        setMessage("❌ " + data.message);
+        showNotification("error", data.message || "Signup failed");
       }
     } catch (error) {
       console.error("Signup Error:", error);
-      setMessage("❌ Something went wrong. Please try again.");
+      showNotification("error", "Something went wrong. Please try again.");
     }
   };
 
   return (
     <div className="signup-page">
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`notification ${notification.type}`}>
+          <div className="notification-icon">
+            {notification.type === "success" ? "✓" : "✕"}
+          </div>
+          <div className="notification-content">
+            <p className="notification-message">{notification.message}</p>
+          </div>
+          <button 
+            className="notification-close"
+            onClick={() => setNotification(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Right side image */}
       <div className="right-side">
         <img src="/image/cake.jpg" alt="Cafe background" />
@@ -51,7 +73,7 @@ const SignupPage = () => {
 
       {/* Signup Form */}
       <form className="signup-form" onSubmit={handleSubmit}>
-        <img src="/image/logo.png" alt="Cafe Logo" className="logo" />
+        <img src="/image/lumierelogo.png" alt="Cafe Logo" className="logo" />
 
         <p className="subtitle">Create your account</p>
 
@@ -93,8 +115,6 @@ const SignupPage = () => {
         />
 
         <button type="submit" className="signup-btn">Sign Up</button>
-
-        {message && <p className="signup-message">{message}</p>}
 
         <p className="login-text">
           Already have an account?{" "}

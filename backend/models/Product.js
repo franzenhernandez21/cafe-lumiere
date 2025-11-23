@@ -1,14 +1,19 @@
+// models/Product.js
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  description: String,
+  description: { type: String, default: "" }, // ✅ FIXED: Added default value
   price: { type: Number, required: true },
   category: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Category", 
     required: true 
-  }, // ✅ Reference to Category model
+  },
+  subcategory: { 
+    type: String, 
+    default: null 
+  },
   stock: { type: Number, default: 0 },
   image: String,
   status: {

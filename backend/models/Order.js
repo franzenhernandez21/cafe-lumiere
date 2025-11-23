@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User",
+    required: false // ✅ Make optional
+  },
   items: [
     {
       product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
@@ -10,8 +14,21 @@ const orderSchema = new mongoose.Schema({
       price_at_purchase: Number,
     },
   ],
-  total: Number,
+  subtotal: { type: Number, default: 0 },
+  shipping: { type: Number, default: 0 },
+  discount: { type: Number, default: 0 },
+  total: { type: Number, default: 0 }, // ✅ Add default value
+  shippingAddress: {
+    fullname: { type: String, required: false }, // ✅ Make optional
+    phone: { type: String, required: false }, // ✅ Make optional
+    address: { type: String, required: false } // ✅ Make optional
+  },
   payment_method: { type: String, default: "Cash on Delivery" },
+  bankTransferDetails: {
+    accountName: String,
+    accountNumber: String
+  },
+  promoCodeUsed: { type: String },
   status: {
     type: String,
     enum: ["Pending", "Paid", "Completed", "Cancelled"],
@@ -20,4 +37,5 @@ const orderSchema = new mongoose.Schema({
   order_date: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+// ✅ Check if model exists before creating it
+module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

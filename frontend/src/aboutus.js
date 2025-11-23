@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./aboutus.css";
 
@@ -74,9 +74,17 @@ const goalsData = [
 
 export default function AboutUs() {
   const navigate = useNavigate();
-  const [active, setActive] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const [clickedGoal, setClickedGoal] = useState(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const openModal = (member) => {
     setSelectedMember(member);
@@ -88,7 +96,6 @@ export default function AboutUs() {
 
   const handleGoalClick = (goalId) => {
     setClickedGoal(goalId);
-    // Reset animation after it completes
     setTimeout(() => {
       setClickedGoal(null);
     }, 1000);
@@ -104,19 +111,25 @@ export default function AboutUs() {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
           position: "relative",
         }}
       >
-        <header className="bakery-header">
-          <div className="logo"></div>
-          <ul className="nav-links">
+        <header className={`bakery-header ${isScrolled ? 'scrolled' : ''}`}>
+          {/* Logo Section */}
+          <div className="header-logo" onClick={() => navigate("/")}>
+            <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="logo-image" />
+            <span className="logo-text">Café Lumière</span>
+          </div>
+
+          {/* Navigation */}
+          <nav className="nav-links">
             <li onClick={() => navigate("/")}>Home</li>
             <li onClick={() => navigate("/aboutus")}>About Us</li>
-            <li onClick={() => navigate("/blogs")}>Blogs</li>
             <li onClick={() => navigate("/contactus")}>Contact Us</li>
-          </ul>
+          </nav>
         </header>
-        <main className="bakery-main" style={{ padding: "60px 80px" }}>
+        <main className="bakery-main">
           <div className="text-section">
             <h1>Meet Our <span className="highlight-lightbrown">Amazing Team</span></h1>
           </div>
@@ -213,8 +226,6 @@ export default function AboutUs() {
               </div>
             ))}
           </div>
-          
-
         </div>
       </section>
 
@@ -224,7 +235,10 @@ export default function AboutUs() {
           <div className="footer-content">
             {/* About Section */}
             <div className="footer-column">
-              <h3 className="footer-logo">Café Lumière</h3>
+              <div className="footer-logo-section">
+                <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="footer-logo-image" />
+                <h3 className="footer-logo">Café Lumière</h3>
+              </div>
               <p className="footer-tagline">Living the Coffee Life, One Cup at a Time</p>
               <p className="footer-description">
                 Experience the perfect blend of ambiance, quality, and community at our specialty café.

@@ -1,18 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './contactus.css';
+
+// Toast Notification Component
+const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`toast toast-${type}`}>
+      <div className="toast-icon">
+        {type === 'success' && '✓'}
+        {type === 'error' && '✕'}
+        {type === 'warning' && '⚠'}
+        {type === 'info' && 'ℹ'}
+      </div>
+      <span className="toast-message">{message}</span>
+      <button className="toast-close" onClick={onClose}>×</button>
+    </div>
+  );
+};
 
 export default function CafeLumiereContact() {
   const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
   
+  // Toast states
+  const [toasts, setToasts] = useState([]);
+  
+  // Form states
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   });
   const [focusedField, setFocusedField] = useState(null);
+  
+  // Promo code states
   const [showSecret, setShowSecret] = useState(false);
   const [clickCount, setClickCount] = useState(0);
+  const [promoCode, setPromoCode] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+  
+  // Header states from UserHomePage
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
+
+  // Toast helper function
+  const showToast = (message, type = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    
+    // Get logged in user
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUser(storedUser);
+      fetchCartCount(storedUser._id || storedUser.id);
+    }
+    
+    // Fetch products for search
+    fetchProducts();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isMenuOpen && !e.target.closest('.mobile-drawer') && !e.target.closest('.hamburger-btn')) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? 'hidden' : 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isMenuOpen]);
+
+  const fetchProducts = () => {
+    axios
+      .get("http://localhost:5000/api/products")
+      .then((res) => {
+        const productData = res.data.products || res.data || [];
+        setAllProducts(productData);
+      })
+      .catch((err) => {
+        console.error("Error fetching products:", err);
+        showToast("Failed to load products", "error");
+        setAllProducts([]);
+      });
+  };
+
+  const fetchCartCount = async (userId) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/cart/${userId}`);
+      const cart = res.data.cart;
+      if (cart && cart.items) setCartCount(cart.items.length);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+      showToast("Failed to load cart", "error");
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -23,20 +134,120 @@ export default function CafeLumiereContact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Thank you ${formData.name}! We'll be in touch soon ☕`);
+    showToast(`Thank you ${formData.name}! We'll be in touch soon ☕`, "success");
     setFormData({ name: '', email: '', message: '' });
   };
 
-  const handleSecretClick = () => {
+  // Promo code functionality
+  const handleSecretClick = async () => {
     setClickCount(prev => prev + 1);
+    
     if (clickCount >= 2) {
-      setShowSecret(true);
-      setClickCount(0);
+      if (!user) {
+        showToast('Please login to claim your promo code!', "warning");
+        navigate('/login');
+        return;
+      }
+      
+      setLoading(true);
+      setError('');
+      
+      try {
+        const userId = user._id || user.id;
+        const res = await axios.post(`http://localhost:5000/api/users/${userId}/generate-promo`);
+        
+        if (res.data.success) {
+          setPromoCode(res.data.promoCode);
+          setShowSecret(true);
+          showToast('Promo code generated successfully! 🎉', "success");
+        }
+      } catch (err) {
+        const errorMessage = err.response?.data?.message || 'Error generating promo code';
+        setError(errorMessage);
+        showToast(errorMessage, "error");
+      } finally {
+        setLoading(false);
+        setClickCount(0);
+      }
     }
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(promoCode);
+    setCopied(true);
+    showToast('Promo code copied to clipboard!', "success");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Search functionality
+  const searchSuggestions = searchQuery.trim()
+    ? allProducts.filter(product => product.name?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
+    : [];
+
+  const handleSuggestionClick = (product) => {
+    setSearchQuery("");
+    setShowSuggestions(false);
+    navigate(`/product/${product._id}`);
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+    setShowSuggestions(true);
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+    if (searchQuery.trim()) setShowSuggestions(true);
+  };
+
+  const handleSearchBlur = () => {
+    setIsSearchFocused(false);
+    setTimeout(() => setShowSuggestions(false), 300);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowSuggestions(false);
+      navigate(`/userhomepage?search=${searchQuery}`);
+    }
+  };
+
+  const handleNavClick = (path) => {
+    setIsMenuOpen(false);
+    navigate(path);
   };
 
   return (
     <div className="page-wrapper">
+      {/* Toast Container */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
+        ))}
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      <div className={`drawer-overlay ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)} />
+
+      {/* Mobile Drawer */}
+      <div className={`mobile-drawer ${isMenuOpen ? 'open' : ''}`}>
+        <div className="drawer-header">
+          <div className="drawer-logo">
+            <img src="/image/lumierelogo.png" alt="Logo" />
+            <span>Café Lumière</span>
+          </div>
+          <button className="drawer-close" onClick={() => setIsMenuOpen(false)}>×</button>
+        </div>
+        <nav className="drawer-nav">
+          <a onClick={() => handleNavClick("/userhomepage")}>Home</a>
+          <a onClick={() => handleNavClick("/aboutus")}>About Us</a>
+          <a onClick={() => handleNavClick("/contactus")}>Contact Us</a>
+          <a onClick={() => handleNavClick("/profile")}>Profile</a>
+          <a onClick={() => handleNavClick("/cart")}>Cart {cartCount > 0 && `(${cartCount})`}</a>
+        </nav>
+      </div>
+
       {/* ===== HEADER SECTION ===== */}
       <div
         className="bakery-container"
@@ -45,19 +256,62 @@ export default function CafeLumiereContact() {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
           position: "relative",
         }}
       >
-        <header className="bakery-header">
-          <div className="logo"></div>
-          <ul className="nav-links">
-            <li onClick={() => navigate("/")}>Home</li>
-            <li onClick={() => navigate("/aboutus")}>About Us</li>
-            <li onClick={() => navigate("/blogs")}>Blogs</li>
-            <li onClick={() => navigate("/contactus")}>Contact Us</li>
-          </ul>
+        <header className={`bakery-header ${isScrolled ? 'scrolled' : ''}`}>
+          <button className="hamburger-btn" onClick={() => setIsMenuOpen(true)}>
+            <span></span><span></span><span></span>
+          </button>
+
+          <div className="header-logo" onClick={() => navigate("/userhomepage")}>
+            <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="logo-image" />
+            <span className="logo-text">Café Lumière</span>
+          </div>
+
+          <nav className="navbar">
+            <a onClick={() => navigate("/userhomepage")}>Home</a>
+            <a onClick={() => navigate("/aboutus")}>About Us</a>
+            <a onClick={() => navigate("/contactus")}>Contact Us</a>
+          </nav>
+
+          <div className="header-right">
+            <form onSubmit={handleSearch} className={`search-bar ${isSearchFocused ? 'focused' : ''}`}>
+              <input type="text" placeholder="Search..." value={searchQuery}
+                onChange={handleSearchInputChange} onFocus={handleSearchFocus} onBlur={handleSearchBlur} />
+              <button type="submit" className="search-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+              </button>
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <div className="search-suggestions">
+                  {searchSuggestions.map((product, index) => (
+                    <div key={index} className="search-suggestion-item"
+                      onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(product); }}>
+                      <img src={product.image ? (product.image.startsWith("http") ? product.image : `http://localhost:5000/${product.image}`) : "/image/placeholder.png"}
+                        alt={product.name} className="suggestion-image" />
+                      <div className="suggestion-details">
+                        <span className="suggestion-name">{product.name}</span>
+                        <span className="suggestion-price">₱{product.price?.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </form>
+            <button className="icon-button" onClick={() => navigate("/profile")} title="Profile">
+              <img src="/image/profileto.png" alt="Profile" />
+            </button>
+            <button className="icon-button cart-icon" onClick={() => navigate("/cart")} title="Cart">
+              <img src="/image/cartto.png" alt="Cart" />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </button>
+          </div>
         </header>
-        <main className="bakery-main" style={{ padding: "60px 80px" }}>
+
+        <main className="bakery-main">
           <div className="text-section">
             <h1>Get in <span className="highlight-lightbrown">Touch</span> with Us</h1>
           </div>
@@ -68,7 +322,7 @@ export default function CafeLumiereContact() {
       <div className="contact-wrapper">
         <div className="contact-container">
           <div className="card">
-            {/* Left Panel with Background Image */}
+            {/* Left Panel */}
             <div 
               className="left-panel"
               style={{
@@ -78,7 +332,11 @@ export default function CafeLumiereContact() {
               }}
             >
               <div className="left-overlay">
-                <div className="coffee-icon" onClick={handleSecretClick}>
+                <div 
+                  className="coffee-icon" 
+                  onClick={handleSecretClick}
+                  title="Click me 3 times for a surprise! 🎉"
+                >
                   ☕
                 </div>
                 
@@ -204,23 +462,62 @@ export default function CafeLumiereContact() {
         </div>
       </div>
 
-      {/* Secret Modal */}
+      {/* ===== PROMO CODE MODAL ===== */}
       {showSecret && (
         <div className="modal" onClick={() => setShowSecret(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="close-button" onClick={() => setShowSecret(false)}>
               ×
             </button>
-            <h2 className="modal-title">🎉 Secret Discovered! 🎉</h2>
-            <div className="image-container">
-              <div className="placeholder-image">
-                <p className="placeholder-text">
-                  ☕ Your Secret Image Here ☕
-                </p>
-                <p className="small-text">Replace this with your own image!</p>
+            <h2 className="modal-title">🎉 Your Exclusive Promo Code! 🎉</h2>
+            
+            <div className="promo-code-container">
+              <div className="promo-code-box">
+                <div className="promo-code-label">YOUR PROMO CODE</div>
+                <div className="promo-code-value">{promoCode}</div>
+                <button 
+                  className="copy-button"
+                  onClick={handleCopyCode}
+                >
+                  {copied ? (
+                    <>
+                      <span className="copy-icon">✓</span>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <span className="copy-icon">📋</span>
+                      Copy Code
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              <div className="promo-details">
+                <div className="promo-benefit">
+                  <span className="benefit-icon">💰</span>
+                  <span className="benefit-text">Get 50% OFF on your next order!</span>
+                </div>
+                <div className="promo-expiry">
+                  <span className="expiry-icon">⏰</span>
+                  <span className="expiry-text">Valid for 7 days</span>
+                </div>
               </div>
             </div>
-            <p className="secret-message">You found the hidden café treasure! 🥐✨</p>
+            
+            <p className="secret-message">
+              Use this code at checkout to enjoy your discount! ☕✨
+            </p>
+            
+            <div className="promo-instructions">
+              <p>📝 <strong>How to use:</strong></p>
+              <ol>
+                <li>Add items to your cart</li>
+                <li>Go to checkout</li>
+                <li>Enter this promo code</li>
+                <li>Enjoy 50% OFF!</li>
+              </ol>
+            </div>
           </div>
         </div>
       )}
@@ -229,16 +526,17 @@ export default function CafeLumiereContact() {
       <footer className="footer-section">
         <div className="footer-container">
           <div className="footer-content">
-            {/* About Section */}
             <div className="footer-column">
-              <h3 className="footer-logo">Café Lumière</h3>
+              <div className="footer-logo-section">
+                <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="footer-logo-image" />
+                <h3 className="footer-logo">Café Lumière</h3>
+              </div>
               <p className="footer-tagline">Living the Coffee Life, One Cup at a Time</p>
               <p className="footer-description">
                 Experience the perfect blend of ambiance, quality, and community at our specialty café.
               </p>
             </div>
 
-            {/* Contact Section */}
             <div className="footer-column">
               <h4 className="footer-heading">Contact Us</h4>
               <div className="footer-contact">
@@ -257,7 +555,6 @@ export default function CafeLumiereContact() {
               </div>
             </div>
 
-            {/* Social Media Section */}
             <div className="footer-column">
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
@@ -286,7 +583,6 @@ export default function CafeLumiereContact() {
               </div>
             </div>
 
-            {/* Hours Section */}
             <div className="footer-column">
               <h4 className="footer-heading">Opening Hours</h4>
               <div className="hours-list">

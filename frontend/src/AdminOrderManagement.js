@@ -5,10 +5,18 @@ import "./AdminOrderManagement.css";
 function AdminOrderManagement() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  // ✅ Notification Helper
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -16,7 +24,7 @@ function AdminOrderManagement() {
 
   useEffect(() => {
     applyFilters();
-  }, [searchQuery, statusFilter, orders]);
+  }, [statusFilter, orders]);
 
   const fetchOrders = async () => {
     try {
@@ -25,7 +33,7 @@ function AdminOrderManagement() {
       setOrders(res.data.orders || []);
     } catch (err) {
       console.error("Error fetching orders:", err);
-      alert("Failed to load orders");
+      showNotification("error", "Failed to load orders");
     } finally {
       setLoading(false);
     }
@@ -34,20 +42,9 @@ function AdminOrderManagement() {
   const applyFilters = () => {
     let filtered = orders;
 
-    // Filter by status
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (order) => order.status.toLowerCase() === statusFilter.toLowerCase()
-      );
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (order) =>
-          order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.user?.fullname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.user?.email?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -60,45 +57,67 @@ function AdminOrderManagement() {
       await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, {
         status: newStatus,
       });
-      alert(`Order status updated to ${newStatus}!`);
+      showNotification("success", `Order status updated to ${newStatus}!`);
       fetchOrders();
       setSelectedOrder(null);
     } catch (err) {
       console.error("Error updating status:", err);
-      alert("Failed to update order status");
+      showNotification("error", "Failed to update order status");
     } finally {
       setLoading(false);
     }
   };
 
   const deleteOrder = async (orderId) => {
-    if (window.confirm("Are you sure you want to delete this order?")) {
-      try {
-        setLoading(true);
-        await axios.delete(`http://localhost:5000/api/orders/${orderId}`);
-        alert("Order deleted successfully!");
-        fetchOrders();
-      } catch (err) {
-        console.error("Error deleting order:", err);
-        alert("Failed to delete order");
-      } finally {
-        setLoading(false);
-      }
+    try {
+      setLoading(true);
+      await axios.delete(`http://localhost:5000/api/orders/${orderId}`);
+      showNotification("success", "Order deleted successfully!");
+      fetchOrders();
+      setShowDeleteConfirm(false);
+      setOrderToDelete(null);
+      setSelectedOrder(null);
+    } catch (err) {
+      console.error("Error deleting order:", err);
+      showNotification("error", "Failed to delete order");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleDeleteClick = (orderId) => {
+    setOrderToDelete(orderId);
+    setShowDeleteConfirm(true);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setOrderToDelete(null);
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: "#ffa500",
-      paid: "#4caf50",
-      completed: "#2196f3",
-      cancelled: "#f44336",
+      pending: "#d4a574",
+      paid: "#8ab446",
+      completed: "#5a9fd4",
+      cancelled: "#d17a5a",
     };
     return colors[status.toLowerCase()] || "#666";
   };
 
   return (
     <div className="admin-orders-container">
+      {/* ✅ Notification Toast */}
+      {notification && (
+        <div className={`order-notification ${notification.type}`}>
+          <div className="order-notification-icon">
+            {notification.type === "success" ? "✓" : "✕"}
+          </div>
+          <p className="order-notification-message">{notification.message}</p>
+          <button className="order-notification-close" onClick={() => setNotification(null)}>×</button>
+        </div>
+      )}
+
       <div className="orders-header">
         <h2 className="orders-title">Orders Management</h2>
         <button onClick={fetchOrders} className="refresh-btn" disabled={loading}>
@@ -106,18 +125,7 @@ function AdminOrderManagement() {
         </button>
       </div>
 
-      {/* Filters */}
       <div className="filters-container">
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search by Order ID, Customer Name, or Email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-        </div>
-
         <div className="status-filters">
           <button
             className={`filter-btn ${statusFilter === "all" ? "active" : ""}`}
@@ -152,7 +160,6 @@ function AdminOrderManagement() {
         </div>
       </div>
 
-      {/* Orders List */}
       {loading ? (
         <div className="loading-state">Loading orders...</div>
       ) : filteredOrders.length === 0 ? (
@@ -231,7 +238,7 @@ function AdminOrderManagement() {
                     View Details
                   </button>
                   <button
-                    onClick={() => deleteOrder(order._id)}
+                    onClick={() => handleDeleteClick(order._id)}
                     className="delete-btn"
                     disabled={loading}
                   >
@@ -244,114 +251,194 @@ function AdminOrderManagement() {
         </div>
       )}
 
-      {/* Order Details Modal */}
+      {/* Enhanced Modal */}
       {selectedOrder && (
         <div className="modal-overlay" onClick={() => setSelectedOrder(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Order Details</h3>
+          <div className="modal-enhanced" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header with Cafe Lumière branding */}
+            <div className="modal-header-enhanced">
+              <div className="cafe-brand">
+                <span className="cafe-name">Cafe Lumière ☕</span>
+                <span className="modal-subtitle">Order Details</span>
+              </div>
               <button
-                className="close-btn"
+                className="close-btn-enhanced"
                 onClick={() => setSelectedOrder(null)}
               >
                 ✕
               </button>
             </div>
 
-            <div className="modal-body">
-              <div className="modal-section">
-                <h4>Customer Information</h4>
-                <p>
-                  <strong>Name:</strong> {selectedOrder.user?.fullname}
-                </p>
-                <p>
-                  <strong>Email:</strong> {selectedOrder.user?.email}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {selectedOrder.user?.phone || "N/A"}
-                </p>
-                <p>
-                  <strong>Address:</strong>{" "}
-                  {selectedOrder.user?.address || "N/A"}
-                </p>
-              </div>
+            <div className="modal-body-enhanced">
+              {/* Two Column Layout */}
+              <div className="modal-columns">
+                {/* Left Column - Customer Information */}
+                <div className="modal-column">
+                  <div className="info-card">
+                    <h4 className="card-title">CUSTOMER INFORMATION</h4>
+                    
+                    <div className="info-group">
+                      <span className="info-label">Name</span>
+                      <span className="info-value">{selectedOrder.user?.fullname || "N/A"}</span>
+                    </div>
 
-              <div className="modal-section">
-                <h4>Order Information</h4>
-                <p>
-                  <strong>Order ID:</strong> {selectedOrder._id}
-                </p>
-                <p>
-                  <strong>Date:</strong>{" "}
-                  {new Date(selectedOrder.order_date).toLocaleString()}
-                </p>
-                <p>
-                  <strong>Payment:</strong> {selectedOrder.payment_method}
-                </p>
-                <p>
-                  <strong>Status:</strong>{" "}
-                  <span
-                    style={{ color: getStatusColor(selectedOrder.status) }}
-                  >
-                    {selectedOrder.status}
-                  </span>
-                </p>
-              </div>
+                    <div className="info-group">
+                      <span className="info-label">Email</span>
+                      <span className="info-value">{selectedOrder.user?.email || "N/A"}</span>
+                    </div>
 
-              <div className="modal-section">
-                <h4>Items</h4>
-                {selectedOrder.items.map((item, idx) => (
-                  <div key={idx} className="modal-item">
-                    <span>
-                      {item.name} x{item.quantity}
-                    </span>
-                    <span>₱{item.price_at_purchase?.toFixed(2)}</span>
+                    <div className="info-group">
+                      <span className="info-label">Phone</span>
+                      <span className="info-value">{selectedOrder.user?.phone || "N/A"}</span>
+                    </div>
+
+                    <div className="info-group">
+                      <span className="info-label">Address</span>
+                      <span className="info-value">{selectedOrder.user?.address || "N/A"}</span>
+                    </div>
                   </div>
-                ))}
-                <div className="modal-total">
-                  <strong>Total:</strong>
-                  <strong>₱{selectedOrder.total?.toFixed(2)}</strong>
+                </div>
+
+                {/* Right Column - Order Items */}
+                <div className="modal-column">
+                  <div className="info-card">
+                    <h4 className="card-title">ORDER ITEMS</h4>
+                    
+                    <div className="items-list-enhanced">
+                      {selectedOrder.items.map((item, idx) => (
+                        <div key={idx} className="item-row-enhanced">
+                          <span className="item-name-qty">{item.name} x{item.quantity}</span>
+                          <span className="item-price">₱{item.price_at_purchase?.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="modal-section">
-                <h4>Update Status</h4>
-                <div className="status-buttons">
+              {/* Total Section */}
+              <div className="total-section">
+                <span className="total-label">Total</span>
+                <span className="total-value">₱{selectedOrder.total?.toFixed(2)}</span>
+              </div>
+
+              {/* Status Update Section */}
+              <div className="status-update-section">
+                <h4 className="update-status-title">UPDATE STATUS</h4>
+                <div className="status-buttons-grid">
                   <button
-                    onClick={() =>
-                      updateOrderStatus(selectedOrder._id, "Pending")
-                    }
-                    className="status-btn pending"
+                    onClick={() => updateOrderStatus(selectedOrder._id, "Pending")}
+                    className="status-btn-new pending"
                     disabled={loading}
                   >
-                    Pending
+                    PENDING
                   </button>
                   <button
                     onClick={() => updateOrderStatus(selectedOrder._id, "Paid")}
-                    className="status-btn paid"
+                    className="status-btn-new paid"
                     disabled={loading}
                   >
-                    Paid
+                    PAID
                   </button>
                   <button
-                    onClick={() =>
-                      updateOrderStatus(selectedOrder._id, "Completed")
-                    }
-                    className="status-btn completed"
+                    onClick={() => updateOrderStatus(selectedOrder._id, "Completed")}
+                    className="status-btn-new completed"
                     disabled={loading}
                   >
-                    Completed
+                    COMPLETED
                   </button>
                   <button
-                    onClick={() =>
-                      updateOrderStatus(selectedOrder._id, "Cancelled")
-                    }
-                    className="status-btn cancelled"
+                    onClick={() => updateOrderStatus(selectedOrder._id, "Cancelled")}
+                    className="status-btn-new cancelled"
                     disabled={loading}
                   >
-                    Cancelled
+                    CANCELLED
                   </button>
                 </div>
+              </div>
+
+              {/* Delete Button */}
+              <div className="delete-order-section">
+                <button
+                  onClick={() => handleDeleteClick(selectedOrder._id)}
+                  className="delete-order-button"
+                  disabled={loading}
+                >
+                   Delete Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={cancelDelete}>
+          <div className="modal-enhanced delete-modal" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="modal-header-enhanced">
+              <div className="cafe-brand">
+                <span className="cafe-name">Confirm Delete</span>
+                <span className="modal-subtitle">This action cannot be undone</span>
+              </div>
+              <button
+                className="close-btn-enhanced"
+                onClick={cancelDelete}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body-enhanced">
+              <div className="delete-confirm-content">
+                <p className="delete-message">
+                  Are you sure you want to delete this order?
+                </p>
+                
+                {orders.find(o => o._id === orderToDelete) && (
+                  <div className="delete-order-info">
+                    <div className="delete-info-row">
+                      <span className="delete-info-label">Order ID:</span>
+                      <span className="delete-info-value">{orderToDelete}</span>
+                    </div>
+                    <div className="delete-info-row">
+                      <span className="delete-info-label">Customer:</span>
+                      <span className="delete-info-value">
+                        {orders.find(o => o._id === orderToDelete).user?.fullname || "N/A"}
+                      </span>
+                    </div>
+                    <div className="delete-info-row">
+                      <span className="delete-info-label">Email:</span>
+                      <span className="delete-info-value">
+                        {orders.find(o => o._id === orderToDelete).user?.email || "N/A"}
+                      </span>
+                    </div>
+                    <div className="delete-info-row">
+                      <span className="delete-info-label">Total:</span>
+                      <span className="delete-info-value">
+                        ₱{orders.find(o => o._id === orderToDelete).total?.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="delete-actions">
+                <button
+                  onClick={() => deleteOrder(orderToDelete)}
+                  className="confirm-delete-btn"
+                  disabled={loading}
+                >
+                  {loading ? "Deleting..." : "OK"}
+                </button>
+                <button
+                  onClick={cancelDelete}
+                  className="cancel-delete-btn"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
@@ -360,6 +447,5 @@ function AdminOrderManagement() {
     </div>
   );
 }
-
 
 export default AdminOrderManagement;

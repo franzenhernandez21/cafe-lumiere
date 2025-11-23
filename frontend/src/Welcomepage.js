@@ -6,10 +6,13 @@ const Welcomepage = () => {
   const navigate = useNavigate();
   const [activeProduct, setActiveProduct] = useState(0);
   const [scrollY, setScrollY] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      const currentScrollY = window.scrollY;
+      setScrollY(currentScrollY);
+      setIsScrolled(currentScrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -44,7 +47,12 @@ const Welcomepage = () => {
   ];
 
   const handleDiscover = () => navigate("/login");
-  const handleGuestMode = () => navigate("/userhomepage");
+  
+  // Guest Mode handler - sets guest flag in sessionStorage
+  const handleGuestMode = () => {
+    sessionStorage.setItem('isGuestMode', 'true');
+    navigate("/userhomepage");
+  };
 
   return (
     <div>
@@ -57,40 +65,36 @@ const Welcomepage = () => {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundAttachment: "fixed",
+          minHeight: "100vh"
         }}
       >
-        <header className="bakery-header">
-          <div className="logo"></div>
-          <ul className="nav-links">
+        <header className={`bakery-header ${isScrolled ? 'scrolled' : ''}`}>
+          {/* Logo Section */}
+          <div className="header-logo">
+            <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="logo-image" />
+            <span className="logo-text">Café Lumière</span>
+          </div>
+
+          {/* Navigation */}
+          <nav className="nav-links">
             <li onClick={() => navigate("/aboutus")}>About Us</li>
-            <li onClick={() => navigate("/blogs")}>Blogs</li>
-            <li onClick={() => navigate("/contactus")}>Contact Us</li>
-          </ul>
+            <li onClick={() => navigate("/Contactus2")}>Contact Us</li>
+          </nav>
         </header>
         <main className="bakery-main">
           <div className="text-section">
-            <h1>
-              Welcome to Café Lumière
-              <span className="highlight-lightbrown">Coffee & Dessert!</span>
-            </h1>
-            <p className="tagline">Living the Coffee Life, One Cup at a Time</p>
+            <h1>Cafe Lumière</h1>
+            <h1 className="highlight-lightbrown">Coffee & Dessert!</h1>
             <div className="buttons-container">
-              <button className="btn order-btn" onClick={handleDiscover}>Discover Me</button>
-              <button className="btn guest-btn" onClick={handleGuestMode}>Guest Mode</button>
+              <button className="btn order-btn" onClick={handleDiscover}>DISCOVER ME</button>
+              <button className="btn guest-btn" onClick={handleGuestMode}>GUEST MODE</button>
             </div>
           </div>
         </main>
       </div>
 
       {/* ===== FRESH PRODUCTS INTERACTIVE ===== */}
-      <section 
-        className="fresh-products-section"
-        style={{
-          opacity: scrollY > 200 ? 1 : 0,
-          transform: scrollY > 200 ? 'translateY(0)' : 'translateY(50px)',
-          transition: 'all 0.8s ease-out'
-        }}
-      >
+      <section className="fresh-products-section">
         <h2>Our Fresh Products</h2>
         <p className="section-subtitle">Discover the artistry in every creation</p>
         
@@ -128,13 +132,7 @@ const Welcomepage = () => {
       </section>
 
       {/* ===== SERVING SECTION ===== */}
-      <section 
-        className="serving-section"
-        style={{
-          opacity: scrollY > 600 ? 1 : 0,
-          transition: 'opacity 0.8s ease-out'
-        }}
-      >
+      <section className="serving-section">
         <img src="/image/cafelumietre.gif" alt="Serving Happiness" className="serving-video" />
         <div className="serving-overlay">
           <h2>Serving Happiness in Every Bite</h2>
@@ -149,7 +147,10 @@ const Welcomepage = () => {
           <div className="footer-content">
             {/* About Section */}
             <div className="footer-column">
-              <h3 className="footer-logo">Café Lumière</h3>
+              <div className="footer-logo-section">
+                <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="footer-logo-image" />
+                <h3 className="footer-logo">Café Lumière</h3>
+              </div>
               <p className="footer-tagline">Living the Coffee Life, One Cup at a Time</p>
               <p className="footer-description">
                 Experience the perfect blend of ambiance, quality, and community at our specialty café.
