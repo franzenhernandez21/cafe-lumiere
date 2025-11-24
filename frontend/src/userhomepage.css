@@ -749,6 +749,125 @@ body, html {
 
 .quick-cart-btn:hover { background: linear-gradient(135deg, #6f5838, #8b6f47); transform: rotate(180deg) scale(1.2); }
 
+/* ===== LIVING ROOM AREA SECTION ===== */
+.living-room-section {
+  
+  height: 70vh;
+  min-height: 500px;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+
+.living-room-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(59, 47, 47, 0.75), rgba(139, 111, 71, 0.65));
+  z-index: 1;
+}
+
+.living-room-content {
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 1s ease;
+  padding: 0 30px;
+  max-width: 900px;
+}
+
+.living-room-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 25px;
+}
+
+.title-cursive {
+  font-family: "Playfair Display", serif;
+  font-size: 4rem;
+  font-weight: 600;
+  color: #f5deb3;
+  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.7);
+  line-height: 1;
+  letter-spacing: 2px;
+}
+.quick-cart-btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.title-bold {
+  font-family: "Dancing Script", cursive;
+  font-size: 5.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 4px 4px 20px rgba(0, 0, 0, 0.8);
+  letter-spacing: 8px;
+  line-height: 1;
+  margin-top: -10px;
+}
+
+.living-room-subtitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #e0d4c1;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Responsive for Living Room Section */
+@media (max-width: 768px) {
+  .living-room-section {
+    height: 55vh;
+    min-height: 400px;
+  }
+
+  .title-cursive {
+    font-size: 2.5rem;
+  }
+
+  .title-bold {
+    font-size: 3.5rem;
+    letter-spacing: 4px;
+  }
+
+  .living-room-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .living-room-section {
+    height: 50vh;
+    min-height: 350px;
+  }
+
+  .title-cursive {
+    font-size: 2rem;
+  }
+
+  .title-bold {
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+  }
+
+  .living-room-subtitle {
+    font-size: 1rem;
+    padding: 0 15px;
+  }
+}
+
+
 /* ===== NEWSLETTER ===== */
 .newsletter {
   background: linear-gradient(135deg, #f2ebe3, #e8dfd3);

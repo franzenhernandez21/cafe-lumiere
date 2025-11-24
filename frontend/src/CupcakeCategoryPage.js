@@ -15,8 +15,21 @@ function CupcakeCategoryPage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
+  const [toasts, setToasts] = useState([]);
 
   const subcategories = ["Classic", "Packs"];
+
+  // Toast notification function
+  const showToast = (message, type = "success") => {
+    const id = Date.now();
+    const newToast = { id, message, type };
+    setToasts(prev => [...prev, newToast]);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 3000);
+  };
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -64,8 +77,8 @@ function CupcakeCategoryPage() {
 
   const addToCart = async (product) => {
     if (!user) {
-      alert("Please login to add items to cart");
-      navigate("/login");
+      showToast("Please login to add items to cart", "error");
+      setTimeout(() => navigate("/login"), 1500);
       return;
     }
 
@@ -76,11 +89,11 @@ function CupcakeCategoryPage() {
         productId: product._id,
         quantity: 1,
       });
-      alert(`${product.name} added to cart!`);
+      showToast(`${product.name} added to cart!`, "success");
       fetchCartCount(userId);
     } catch (err) {
       console.error("Error adding to cart:", err);
-      alert("Failed to add to cart");
+      showToast("Failed to add to cart", "error");
     }
   };
 
@@ -127,6 +140,18 @@ function CupcakeCategoryPage() {
 
   return (
     <div className="category-page">
+      {/* Toast Container */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
+            <span className="toast-icon">
+              {toast.type === "success" ? "✓" : "⚠"}
+            </span>
+            <span className="toast-message">{toast.message}</span>
+          </div>
+        ))}
+      </div>
+
       {/* ===== HEADER WITH LOGO ===== */}
       <header className="header">
         {/* Logo Section */}
@@ -139,7 +164,6 @@ function CupcakeCategoryPage() {
         <nav className="navbar">
           <a onClick={() => navigate("/userhomepage")}>Home</a>
           <a onClick={() => navigate("/aboutus")}>About Us</a>
-          <a onClick={() => navigate("/blogs")}>Blogs</a>
           <a onClick={() => navigate("/contact")}>Contact Us</a>
         </nav>
 
@@ -333,7 +357,7 @@ function CupcakeCategoryPage() {
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
                 <a 
-                  href="https://facebook.com/cafelumiere" 
+                  href="https://www.facebook.com/kaito.203846" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="social-link facebook"

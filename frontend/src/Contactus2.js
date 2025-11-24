@@ -95,15 +95,16 @@ export default function CafeLumiereContact() {
       >
         <header className={`bakery-header ${isScrolled ? 'scrolled' : ''}`}>
           {/* Logo Section */}
-          <div className="header-logo" onClick={() => navigate("/")}>
+          <div className="header-logo">
             <img src="/image/lumierelogo.png" alt="Café Lumière Logo" className="logo-image" />
             <span className="logo-text">Café Lumière</span>
           </div>
 
           {/* Navigation */}
           <nav className="nav-links">
+            <li onClick={() => navigate("/")}>Home</li>
             <li onClick={() => navigate("/aboutus")}>About Us</li>
-            <li onClick={() => navigate("/contactus2")}>Contact Us</li>
+            <li onClick={() => navigate("/Contactus2")}>Contact Us</li>
           </nav>
         </header>
 
@@ -289,7 +290,7 @@ export default function CafeLumiereContact() {
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
                 <a 
-                  href="https://facebook.com/cafelumiere" 
+                  href="https://www.facebook.com/kaito.203846" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="social-link facebook"

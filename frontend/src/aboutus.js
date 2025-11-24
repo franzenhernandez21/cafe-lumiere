@@ -124,9 +124,9 @@ export default function AboutUs() {
 
           {/* Navigation */}
           <nav className="nav-links">
-            <li onClick={() => navigate("/")}>Home</li>
-            <li onClick={() => navigate("/aboutus")}>About Us</li>
-            <li onClick={() => navigate("/contactus")}>Contact Us</li>
+            <a onClick={() => navigate("/")}>Home</a>
+            <a onClick={() => navigate("/aboutus")}>About Us</a>
+            <a onClick={() => navigate("/Contactus2")}>Contact Us</a>
           </nav>
         </header>
         <main className="bakery-main">
@@ -269,7 +269,7 @@ export default function AboutUs() {
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
                 <a 
-                  href="https://facebook.com/cafelumiere" 
+                  href="https://www.facebook.com/kaito.203846" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="social-link facebook"

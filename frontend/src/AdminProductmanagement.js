@@ -16,13 +16,13 @@ const AdminProductManagement = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [notification, setNotification] = useState(null);
 
-  // ✅ Notification Helper
+ 
   const showNotification = (type, message) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 4000);
   };
 
-  // ✅ Subcategory options based on selected category
+  
   const subcategoryOptions = {
     "Coffee": ["Hot", "Cold"],
     "Cakes": ["Flavors", "Occasional"],
@@ -199,7 +199,7 @@ const AdminProductManagement = () => {
 
   return (
     <div className="admin-container">
-      {/* ✅ Notification Toast */}
+      {/* Notification Toast */}
       {notification && (
         <div className={`product-notification ${notification.type}`}>
           <div className="product-notification-icon">
@@ -218,7 +218,7 @@ const AdminProductManagement = () => {
       </div>
 
       <div className="search-container">
-        <span className="search-icon">🔍</span>
+        <span className="search-icon"></span>
         <input
           type="text"
           placeholder="Search products by name, description, category, or subcategory..."
@@ -237,7 +237,7 @@ const AdminProductManagement = () => {
       <div className="product-grid">
         {filteredProducts.length === 0 && !loading ? (
           <div className="empty-state">
-            <span className="empty-icon">📭</span>
+            <span className="empty-icon"></span>
             <p className="empty-text">
               {searchQuery
                 ? "No products found"
@@ -270,10 +270,10 @@ const AdminProductManagement = () => {
                 {hoveredProduct === p._id && (
                   <div className="overlay">
                     <button onClick={() => openEditModal(p)} className="edit-button">
-                      ✏️ Edit
+                       Edit
                     </button>
                     <button onClick={() => handleDeleteClick(p)} className="delete-button">
-                      🗑️ Delete
+                       Delete
                     </button>
                   </div>
                 )}
@@ -301,7 +301,7 @@ const AdminProductManagement = () => {
           <div className="modal-enhanced-product" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-cafe">
               <div className="cafe-brand-header">
-                <span className="cafe-name-product">Cafe Lumière ☕</span>
+                <span className="cafe-name-product">Cafe Lumière</span>
                 <span className="modal-subtitle-product">
                   {editMode ? "Edit Product" : "Add New Product"}
                 </span>

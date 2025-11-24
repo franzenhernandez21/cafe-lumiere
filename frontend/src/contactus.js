@@ -335,7 +335,7 @@ export default function CafeLumiereContact() {
                 <div 
                   className="coffee-icon" 
                   onClick={handleSecretClick}
-                  title="Click me 3 times for a surprise! 🎉"
+                  title="Click me 3 times for a surprise!"
                 >
                   ☕
                 </div>
@@ -378,7 +378,7 @@ export default function CafeLumiereContact() {
                   <h3 className="social-heading">Follow Us</h3>
                   <div className="social-links-contact">
                     <a 
-                      href="https://facebook.com/cafelumiere" 
+                      href="https://www.facebook.com/kaito.203846" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="social-link-contact facebook"
@@ -469,7 +469,7 @@ export default function CafeLumiereContact() {
             <button className="close-button" onClick={() => setShowSecret(false)}>
               ×
             </button>
-            <h2 className="modal-title">🎉 Your Exclusive Promo Code! 🎉</h2>
+            <h2 className="modal-title"> Your Exclusive Promo Code!</h2>
             
             <div className="promo-code-container">
               <div className="promo-code-box">
@@ -486,7 +486,7 @@ export default function CafeLumiereContact() {
                     </>
                   ) : (
                     <>
-                      <span className="copy-icon">📋</span>
+                      <span className="copy-icon"></span>
                       Copy Code
                     </>
                   )}
@@ -495,22 +495,22 @@ export default function CafeLumiereContact() {
               
               <div className="promo-details">
                 <div className="promo-benefit">
-                  <span className="benefit-icon">💰</span>
+                  <span className="benefit-icon"></span>
                   <span className="benefit-text">Get 50% OFF on your next order!</span>
                 </div>
                 <div className="promo-expiry">
-                  <span className="expiry-icon">⏰</span>
+                  <span className="expiry-icon"></span>
                   <span className="expiry-text">Valid for 7 days</span>
                 </div>
               </div>
             </div>
             
             <p className="secret-message">
-              Use this code at checkout to enjoy your discount! ☕✨
+              Use this code at checkout to enjoy your discount!
             </p>
             
             <div className="promo-instructions">
-              <p>📝 <strong>How to use:</strong></p>
+              <p> <strong>How to use:</strong></p>
               <ol>
                 <li>Add items to your cart</li>
                 <li>Go to checkout</li>

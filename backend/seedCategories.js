@@ -63,7 +63,7 @@ mongoose.connect(process.env.MONGO_URI)
       }
     }
 
-    console.log("✅ Default categories with subcategories seeded successfully!");
+    console.log(" Default categories with subcategories seeded successfully!");
     mongoose.connection.close();
   })
-  .catch((err) => console.error("❌ MongoDB connection failed:", err));
+  .catch((err) => console.error(" MongoDB connection failed:", err));

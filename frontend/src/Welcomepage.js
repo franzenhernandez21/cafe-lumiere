@@ -77,8 +77,9 @@ const Welcomepage = () => {
 
           {/* Navigation */}
           <nav className="nav-links">
-            <li onClick={() => navigate("/aboutus")}>About Us</li>
-            <li onClick={() => navigate("/Contactus2")}>Contact Us</li>
+            <a onClick={() => navigate("/aboutus")}>About Us</a>
+            <a onClick={() => navigate("/Contactus2")}>Contact Us</a>
+            
           </nav>
         </header>
         <main className="bakery-main">
@@ -87,7 +88,7 @@ const Welcomepage = () => {
             <h1 className="highlight-lightbrown">Coffee & Dessert!</h1>
             <div className="buttons-container">
               <button className="btn order-btn" onClick={handleDiscover}>DISCOVER ME</button>
-              <button className="btn guest-btn" onClick={handleGuestMode}>GUEST MODE</button>
+              
             </div>
           </div>
         </main>
@@ -181,7 +182,7 @@ const Welcomepage = () => {
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
                 <a 
-                  href="https://facebook.com/cafelumiere" 
+                  href="https://www.facebook.com/kaito.203846" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="social-link facebook"

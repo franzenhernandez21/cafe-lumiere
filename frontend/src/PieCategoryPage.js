@@ -15,8 +15,21 @@ function PieCategoryPage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
+  const [toasts, setToasts] = useState([]);
 
   const subcategories = ["Fruits", "Cream/Custard"];
+
+  // Toast notification function
+  const showToast = (message, type = "success") => {
+    const id = Date.now();
+    const newToast = { id, message, type };
+    setToasts(prev => [...prev, newToast]);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 3000);
+  };
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -64,8 +77,8 @@ function PieCategoryPage() {
 
   const addToCart = async (product) => {
     if (!user) {
-      alert("Please login to add items to cart");
-      navigate("/login");
+      showToast("Please login to add items to cart", "error");
+      setTimeout(() => navigate("/login"), 1500);
       return;
     }
 
@@ -76,11 +89,11 @@ function PieCategoryPage() {
         productId: product._id,
         quantity: 1,
       });
-      alert(`${product.name} added to cart!`);
+      showToast(`${product.name} added to cart!`, "success");
       fetchCartCount(userId);
     } catch (err) {
       console.error("Error adding to cart:", err);
-      alert("Failed to add to cart");
+      showToast("Failed to add to cart", "error");
     }
   };
 
@@ -125,6 +138,18 @@ function PieCategoryPage() {
 
   return (
     <div className="category-page">
+      {/* Toast Container */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
+            <span className="toast-icon">
+              {toast.type === "success" ? "✓" : "⚠"}
+            </span>
+            <span className="toast-message">{toast.message}</span>
+          </div>
+        ))}
+      </div>
+
       {/* ===== HEADER WITH LOGO ===== */}
       <header className="header">
         {/* Logo Section */}
@@ -137,7 +162,6 @@ function PieCategoryPage() {
         <nav className="navbar">
           <a onClick={() => navigate("/userhomepage")}>Home</a>
           <a onClick={() => navigate("/aboutus")}>About Us</a>
-          <a onClick={() => navigate("/blogs")}>Blogs</a>
           <a onClick={() => navigate("/contact")}>Contact Us</a>
         </nav>
 
@@ -322,7 +346,7 @@ function PieCategoryPage() {
             <div className="footer-column">
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
-                <a href="https://facebook.com/cafelumiere" target="_blank" rel="noopener noreferrer" className="social-link facebook">
+                <a href="https://www.facebook.com/kaito.203846" target="_blank" rel="noopener noreferrer" className="social-link facebook">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>

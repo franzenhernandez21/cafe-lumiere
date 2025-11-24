@@ -425,7 +425,7 @@ export default function AboutUs() {
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
                 <a 
-                  href="https://facebook.com/cafelumiere" 
+                  href="https://www.facebook.com/kaito.203846" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="social-link facebook"

@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   address: { type: String },
   birthday: { type: String },
-  status: { type: String, default: "active" }, // "active" or "blocked"
+  status: { type: String, default: "active" },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
    promoCode: {

@@ -1,13 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "./UserManagement.css";
 
-/**
- * UserManagement.jsx
- * - Normalizes user IDs (supports _id or id)
- * - Uses REACT_APP_API_BASE for API base URL (default: http://localhost:5000/api)
- * - Sends Authorization header with token from localStorage if available
- * - Clear, centralized action handlers for block/unblock/delete
- */
+
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
 
@@ -246,7 +240,7 @@ const UserManagement = () => {
         <div className="um-confirm-overlay" onClick={closeConfirmModal}>
           <div className="um-confirm-modal" onClick={(e) => e.stopPropagation()}>
             <div className={`um-confirm-icon ${confirmModal.type}`}>
-              {confirmModal.type === "delete" ? "🗑️" : confirmModal.type === "block" ? "🚫" : "✓"}
+              {confirmModal.type === "delete" ? "🗑️" : confirmModal.type === "block" ? "" : ""}
             </div>
             <h3>
               {confirmModal.type === "delete" && "Delete User?"}
@@ -307,7 +301,7 @@ const UserManagement = () => {
                   <div className="um-info-item"><label>Account Created</label><p>{formatDate(selectedUser.createdAt)}</p></div>
                   <div className="um-info-item"><label>Status</label>
                     <p className={selectedUser.status === "blocked" ? "status-blocked" : "status-active"}>
-                      {selectedUser.status === "blocked" ? "🚫 Blocked" : "✅ Active"}
+                      {selectedUser.status === "blocked" ? " Blocked" : " Active"}
                     </p>
                   </div>
                 </div>
@@ -346,9 +340,9 @@ const UserManagement = () => {
                   {selectedUser.status === "blocked" ? (
                     <button className="um-btn unblock" onClick={() => openConfirmModal("unblock", selectedUser)}><span>✓</span> Unblock User</button>
                   ) : (
-                    <button className="um-btn block" onClick={() => openConfirmModal("block", selectedUser)}><span>🚫</span> Block User</button>
+                    <button className="um-btn block" onClick={() => openConfirmModal("block", selectedUser)}><span></span> Block User</button>
                   )}
-                  <button className="um-btn delete" onClick={() => openConfirmModal("delete", selectedUser)}><span>🗑️</span> Delete User</button>
+                  <button className="um-btn delete" onClick={() => openConfirmModal("delete", selectedUser)}><span></span> Delete User</button>
                 </>
               )}
             </div>

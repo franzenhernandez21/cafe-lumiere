@@ -151,37 +151,26 @@
 .hamburger-btn:hover { background: #8b6f47; }
 .hamburger-btn:hover span { background: white; }
 
-/* ========== HEADER SECTION WITH LOGO ========== */
-.bakery-container {
-  font-family: 'Poppins', sans-serif;
-  color: #fff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  font-size: 18px;
-}
-
 .bakery-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc4 100%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 5px 60px; 
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 0 0 20px 20px;
+  transition: all 0.3s ease;
+  z-index: 1000;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  gap: 30px;
-  border-bottom: 3px solid #d4c4b0;
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .bakery-header.scrolled {
-  background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc4 100%);
-  padding: 10px 40px;
+  background: rgba(0, 0, 0, 0.95);
+  padding: 10px 60px;
 }
 
 /* Header Logo */
@@ -198,75 +187,70 @@
 }
 
 .logo-image {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
-  transition: transform 0.3s ease;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-}
-
-.header-logo:hover .logo-image { 
-  transform: rotate(-5deg); 
+  filter: brightness(1.1);
 }
 
 .logo-text {
-  font-family: "Playfair Display", serif;
-  font-size: 1.6rem;
+  font-family: 'Cinzel', serif;
   font-weight: 700;
-  color: black;
-  white-space: nowrap;
-  letter-spacing: 1px;
+  font-size: 2.2rem;
+  letter-spacing: 2px;
+  color: #ffffff !important;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* Navbar */
-.navbar {
-  display: flex;
-  gap: 35px;
-  font-weight: 500;
-  font-size: 1.05rem;
-  flex: 1;
-  justify-content: center;
+.header-logo:hover .logo-text {
+  color: #e0a96d !important;
 }
 
-.navbar a {
-  text-decoration: none;
-  color: #3b2f2f;
+.logo {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  letter-spacing: 3px;
+  color: #fff;
+  text-transform: uppercase;
   transition: all 0.3s ease;
-  position: relative;
   cursor: pointer;
-  padding: 5px 0;
-  font-weight: 600;
 }
 
-.navbar a::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background: #c8a77b;
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-  border-radius: 2px;
+.logo:hover {
+  color: #e0a96d;
+  transform: scale(1.05);
 }
 
-.navbar a:hover { 
-  color: #8b6f47; 
-  transform: translateY(-2px); 
-}
-
-.navbar a:hover::before { 
-  width: 100%; 
-}
-
-/* Header Right Section */
-.header-right {
+.nav-links {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  list-style: none;
+  gap: 30px;
 }
 
+.nav-links li {
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.nav-links button {
+  background: none;
+  border: none;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+.nav-links button:hover,
+.nav-links li:hover {
+  color: #e0a96d;
+}
 /* Search Bar */
 .search-bar {
   position: relative;

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./userhomepage.css";
 
+
 // Toast Notification Component
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -72,6 +73,7 @@ function UserHomePage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [cartCount, setCartCount] = useState(0);
   const [user, setUser] = useState(null);
+  const isGuest = !user;
   const [categories, setCategories] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -346,9 +348,11 @@ function UserHomePage() {
         <nav className="drawer-nav">
           <a onClick={() => handleNavClick("/userhomepage")}>Home</a>
           <a onClick={() => handleNavClick("/aboutus")}>About Us</a>
-          <a onClick={() => handleNavClick("/profile")}>Profile</a>
+          <a onClick={() => { if (!isGuest) handleNavClick("/profile"); else showToast("Login required", "warning"); }}>Profile</a>
           <a onClick={() => handleNavClick("/contactus")}>Contact Us</a>
-          <a onClick={() => handleNavClick("/cart")}>Cart {cartCount > 0 && `(${cartCount})`}</a>
+          <a onClick={() => { if (!isGuest) handleNavClick("/cart"); else showToast("Login required", "warning"); }}>
+  Cart {cartCount > 0 && `(${cartCount})`}
+</a>
         </nav>
       </div>
 
@@ -365,7 +369,7 @@ function UserHomePage() {
 
         <nav className="navbar">
           <a onClick={() => navigate("/userhomepage")}>Home</a>
-          <a onClick={() => navigate("/aboutus2")}>About Us</a>
+          <a onClick={() => navigate("/aboutus")}>About Us</a>
           <a onClick={() => handleNavClick("/contactus")}>Contact Us</a>
         </nav>
 
@@ -394,10 +398,19 @@ function UserHomePage() {
               </div>
             )}
           </form>
-          <button className="icon-button" onClick={() => navigate("/profile")} title="Profile">
-            <img src="/image/profileto.png" alt="Profile" />
-          </button>
-          <button className="icon-button cart-icon" onClick={() => navigate("/cart")} title="Cart">
+         <button
+  className="icon-button"
+  onClick={() => { if (!isGuest) navigate("/profile"); else showToast("Login required", "warning"); }}
+  title="Profile"
+>
+  <img src="/image/profileto.png" alt="Profile" />
+</button>
+
+          <button
+  className="icon-button cart-icon"
+  onClick={() => { if (!isGuest) navigate("/cart"); else showToast("Login required", "warning"); }}
+  title="Cart"
+>
             <img src="/image/cartto.png" alt="Cart" />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
@@ -429,6 +442,19 @@ function UserHomePage() {
         </div>
       </section>
 
+      {/* Living Room Area Section */}
+      <section className="living-room-section" style={{ backgroundImage: "url('/image/topselling.jpg')" }}>
+        <div className="living-room-content">
+          <h2 className="living-room-title">
+            <span className="title-cursive">Top Selling Products</span>
+            <span className="title-bold">Section</span>
+          </h2>
+          <p className="living-room-subtitle">
+            Handcrafted coffee and irresistible desserts made to brighten your day.
+          </p>
+        </div>
+      </section>
+
       {/* Top Selling Products Section */}
       {topSellingProducts.length > 0 && !searchQuery.trim() && (
         <section className="menu-section top-selling-section">
@@ -454,7 +480,17 @@ function UserHomePage() {
                   <div className="card-footer">
                     <span className="price">₱{item.price?.toFixed(2) || "0.00"}</span>
                     <div className="quick-actions">
-                      <button className="quick-cart-btn" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>+</button>
+                     <div className="quick-actions">
+  <button 
+    className="quick-cart-btn" 
+    onClick={(e) => { 
+      e.stopPropagation(); 
+      if (!isGuest) addToCart(item);
+      else showToast("Login required to add items", "warning");
+    }}
+  >+</button>
+</div>
+
                     </div>
                   </div>
                 </div>
@@ -470,6 +506,19 @@ function UserHomePage() {
           )}
         </section>
       )}
+
+      {/* Living Room Area Section */}
+      <section className="living-room-section" style={{ backgroundImage: "url('/image/topselling.jpg')" }}>
+        <div className="living-room-content">
+          <h2 className="living-room-title">
+            <span className="title-cursive">ALL Products</span>
+            <span className="title-bold">Section</span>
+          </h2>
+          <p className="living-room-subtitle">
+            A cozy café serving handcrafted coffee, refreshing drinks, and delightful desserts all in one place.
+          </p>
+        </div>
+      </section>
 
       {/* All Products Section */}
       <section className="menu-section">
@@ -534,7 +583,7 @@ function UserHomePage() {
             <div className="footer-column">
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
-                <a href="https://facebook.com/cafelumiere" target="_blank" rel="noopener noreferrer" className="social-link facebook">
+                <a href="https://www.facebook.com/kaito.203846" target="_blank" rel="noopener noreferrer" className="social-link facebook">
                   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   <span>Facebook</span>
                 </a>

@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ NEW: GET SINGLE CATEGORY BY ID
+//  NEW: GET SINGLE CATEGORY BY ID
 router.get("/:id", async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);

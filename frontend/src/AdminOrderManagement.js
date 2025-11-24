@@ -121,7 +121,7 @@ function AdminOrderManagement() {
       <div className="orders-header">
         <h2 className="orders-title">Orders Management</h2>
         <button onClick={fetchOrders} className="refresh-btn" disabled={loading}>
-          🔄 Refresh
+          Refresh
         </button>
       </div>
 
@@ -164,7 +164,7 @@ function AdminOrderManagement() {
         <div className="loading-state">Loading orders...</div>
       ) : filteredOrders.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-icon">📦</span>
+          <span className="empty-icon"></span>
           <p>No orders found</p>
         </div>
       ) : (
@@ -258,7 +258,7 @@ function AdminOrderManagement() {
             {/* Modal Header with Cafe Lumière branding */}
             <div className="modal-header-enhanced">
               <div className="cafe-brand">
-                <span className="cafe-name">Cafe Lumière ☕</span>
+                <span className="cafe-name">Cafe Lumière</span>
                 <span className="modal-subtitle">Order Details</span>
               </div>
               <button

@@ -251,6 +251,8 @@
   color: #bbb;
 }
 
+
+
 .search-button {
   background: none;
   border: none;
@@ -628,24 +630,25 @@
 }
 
 /* ===== DESCRIPTION ===== */
-.product-description {
+.product-details-page .product-description {
   padding: 20px 0;
   margin: 10px 0;
 }
 
-.product-description h3 {
+.product-details-page .product-description h3 {
   font-size: 18px;
-  color: #2c2c2c;
+  color: #2c2c2c !important;
   margin: 0 0 10px 0;
   font-weight: 600;
 }
 
-.product-description p {
+.product-details-page .product-description p {
   font-size: 14px;
   line-height: 1.6;
-  color: #666;
+  color: #666 !important;
   margin: 0;
   font-weight: 400;
+  display: block !important;
 }
 
 /* ===== ACTION BUTTONS ===== */

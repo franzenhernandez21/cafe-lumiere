@@ -13,6 +13,8 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [cart, setCart] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -205,6 +207,30 @@ function Profile() {
     };
     return colors[status?.toLowerCase()] || "#666";
   };
+
+   const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) {
+      try {
+        const res = await axios.put(`http://localhost:5000/api/orders/${orderId}/cancel`);
+        if (res.data.success) {
+          showToast("Order cancelled successfully", "success");
+          const storedUser = JSON.parse(localStorage.getItem("user"));
+          fetchOrders(storedUser._id);
+        } else {
+          showToast("Failed to cancel order", "error");
+        }
+      } catch (error) {
+        console.error("Cancel order error:", error);
+        showToast("An error occurred while cancelling order", "error");
+      }
+    }
+  };
+
 
   if (loading) {
     return (
@@ -575,10 +601,6 @@ function Profile() {
                         </p>
                         <p className="order-total">Total: <strong>₱{order.total?.toFixed(2)}</strong></p>
                       </div>
-                      <div className="order-footer">
-                        <button className="order-action-btn">View Details</button>
-                        <button className="order-action-btn secondary">Reorder</button>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -784,7 +806,7 @@ function Profile() {
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
                 <a 
-                  href="https://facebook.com/cafelumiere" 
+                  href="https://www.facebook.com/kaito.203846" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="social-link facebook"

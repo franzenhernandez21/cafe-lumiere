@@ -110,22 +110,12 @@
   color: #3b2f2f;
 }
 
-/* ========== HEADER SECTION (WELCOME PAGE STYLE) ========== */
-.bakery-container {
-  font-family: 'Poppins', sans-serif;
-  color: #fff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  font-size: 18px;
-}
-
+/* === HEADER (NOW FIXED/STICKY) === */
 .bakery-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 60px;
+  padding: 5px 60px; 
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 0 0 20px 20px;
@@ -178,7 +168,22 @@
   color: #e0a96d !important;
 }
 
-/* Navigation Links */
+.logo {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  letter-spacing: 3px;
+  color: #fff;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.logo:hover {
+  color: #e0a96d;
+  transform: scale(1.05);
+}
+
 .nav-links {
   display: flex;
   list-style: none;
@@ -193,8 +198,18 @@
   transition: color 0.3s ease;
 }
 
+.nav-links button {
+  background: none;
+  border: none;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+.nav-links button:hover,
 .nav-links li:hover {
-  color: #ffd700;
+  color: #e0a96d;
 }
 
 /* Main Section */

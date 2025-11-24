@@ -4,7 +4,7 @@ const orderSchema = new mongoose.Schema({
   user: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User",
-    required: false // ✅ Make optional
+    required: false 
   },
   items: [
     {
@@ -17,11 +17,11 @@ const orderSchema = new mongoose.Schema({
   subtotal: { type: Number, default: 0 },
   shipping: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
-  total: { type: Number, default: 0 }, // ✅ Add default value
+  total: { type: Number, default: 0 },
   shippingAddress: {
-    fullname: { type: String, required: false }, // ✅ Make optional
-    phone: { type: String, required: false }, // ✅ Make optional
-    address: { type: String, required: false } // ✅ Make optional
+    fullname: { type: String, required: false }, 
+    phone: { type: String, required: false }, 
+    address: { type: String, required: false } 
   },
   payment_method: { type: String, default: "Cash on Delivery" },
   bankTransferDetails: {
@@ -37,5 +37,5 @@ const orderSchema = new mongoose.Schema({
   order_date: { type: Date, default: Date.now },
 });
 
-// ✅ Check if model exists before creating it
+
 module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

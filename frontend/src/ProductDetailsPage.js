@@ -45,15 +45,22 @@ function ProductDetailsPage() {
     try {
       setLoading(true);
       const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-      console.log("Full Product Data:", res.data);
       
+      // ✅ FIXED: Better data extraction
       const productData = res.data.product || res.data;
+      
+      console.log("=== PRODUCT DATA DEBUG ===");
+      console.log("Full Response:", res.data);
       console.log("Product Object:", productData);
       console.log("Description:", productData.description);
+      console.log("Description Type:", typeof productData.description);
+      console.log("Description Length:", productData.description?.length);
+      console.log("Is Empty String:", productData.description === "");
+      console.log("========================");
       
       setProduct(productData);
     } catch (err) {
-      console.error("Error fetching product:", err);
+      console.error("❌ Error fetching product:", err);
       showToast("Product not found!", "error");
       navigate("/userhomepage");
     } finally {
@@ -64,8 +71,8 @@ function ProductDetailsPage() {
   const fetchAllProducts = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/products");
-      console.log("All products for search:", res.data);
-      setAllProducts(res.data);
+      const productsData = res.data.products || res.data;
+      setAllProducts(productsData);
     } catch (err) {
       console.error("Error fetching products for search:", err);
     }
@@ -132,7 +139,6 @@ function ProductDetailsPage() {
   };
 
   const handleSuggestionClick = (selectedProduct) => {
-    console.log("Search suggestion clicked:", selectedProduct);
     setSearchQuery("");
     setShowSuggestions(false);
     
@@ -174,6 +180,30 @@ function ProductDetailsPage() {
     }
   };
 
+  // ✅ FIXED: Calculate description values BEFORE early returns
+  // This ensures they're always available when rendering
+  const categoryName = product && typeof product.category === 'object' 
+    ? product.category?.name 
+    : product?.category;
+
+  const hasDescription = product?.description && 
+                         typeof product.description === 'string' && 
+                         product.description.trim().length > 0;
+  
+  const productDescription = hasDescription 
+    ? product.description.trim() 
+    : "No description available for this product.";
+
+  // Debug logging (only when product exists)
+  if (product) {
+    console.log("Rendering description:", {
+      hasDescription,
+      descriptionLength: product.description?.length,
+      willDisplay: productDescription,
+      actualText: product.description
+    });
+  }
+
   if (loading) {
     return (
       <div className="product-details-page">
@@ -195,12 +225,6 @@ function ProductDetailsPage() {
       </div>
     );
   }
-
-  const categoryName = typeof product.category === 'object' 
-    ? product.category?.name 
-    : product.category;
-
-  const productDescription = product.description?.trim() || "No description available for this product.";
 
   return (
     <div className="product-details-page">
@@ -231,7 +255,7 @@ function ProductDetailsPage() {
         <nav className="navbar">
           <a onClick={() => navigate("/userhomepage")}>Home</a>
           <a onClick={() => navigate("/aboutus")}>About Us</a>
-          <a onClick={() => navigate("/contact")}>Contact Us</a>
+          <a onClick={() => navigate("/contactus")}>Contact Us</a>
         </nav>
 
         <div className="header-right">
@@ -331,11 +355,11 @@ function ProductDetailsPage() {
                 <div className="benefit-icon"></div>
                 <div className="benefit-text">
                   <span className="benefit-title">Free shipping on</span>
-                  <span className="benefit-subtitle">orders over ₱500</span>
+                  <span className="benefit-subtitle">orders over ₱5000</span>
                 </div>
               </div>
               <div className="benefit-item">
-                <div className="benefit-icon">↩</div>
+                <div className="benefit-icon"></div>
                 <div className="benefit-text">
                   <span className="benefit-title">Easy returns</span>
                   <span className="benefit-subtitle">within 7 days</span>
@@ -384,11 +408,7 @@ function ProductDetailsPage() {
               </div>
             </div>
 
-            {/* Description Section */}
-            <div className="product-description">
-              <h3>Description</h3>
-              <p>{productDescription}</p>
-            </div>
+            
 
             {/* Action Buttons */}
             <div className="action-buttons">
@@ -452,7 +472,7 @@ function ProductDetailsPage() {
             <div className="footer-column">
               <h4 className="footer-heading">Follow Us</h4>
               <div className="social-links">
-                <a href="https://facebook.com/cafelumiere" target="_blank" rel="noopener noreferrer" className="social-link facebook">
+                <a href="https://www.facebook.com/kaito.203846" target="_blank" rel="noopener noreferrer" className="social-link facebook">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>

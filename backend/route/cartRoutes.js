@@ -3,12 +3,12 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const router = express.Router();
 
-// ADD TO CART or UPDATE QUANTITY
+
 router.post("/", async (req, res) => {
   try {
     const { userId, productId, quantity } = req.body;
 
-    // ✅ ADD: Validation
+   
     if (!userId || !productId || !quantity) {
       return res.status(400).json({ 
         success: false, 
@@ -17,54 +17,54 @@ router.post("/", async (req, res) => {
       });
     }
 
-    console.log("🛒 Cart request:", { userId, productId, quantity }); // Debug log
+    console.log("🛒 Cart request:", { userId, productId, quantity }); 
 
-    // Find the product to get its price
+    
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // Calculate subtotal
+  
     const subtotal = product.price * quantity;
 
-    // Find user's cart or create new one
+   
     let cart = await Cart.findOne({ user_id: userId, status: "active" });
 
     if (!cart) {
-      // Create new cart
+      
       cart = new Cart({
         user_id: userId,
         items: [{ product_id: productId, quantity, subtotal }],
       });
-      console.log("✅ Created new cart"); // Debug log
+      console.log(" Created new cart"); 
     } else {
-      // Check if product already exists in cart
+      
       const itemIndex = cart.items.findIndex(
         (item) => item.product_id.toString() === productId
       );
 
       if (itemIndex > -1) {
-        // Update existing item
+        
         cart.items[itemIndex].quantity += quantity;
         cart.items[itemIndex].subtotal = cart.items[itemIndex].quantity * product.price;
-        console.log("✅ Updated existing item"); // Debug log
+        console.log(" Updated existing item"); 
       } else {
-        // Add new item to cart
+        
         cart.items.push({ product_id: productId, quantity, subtotal });
-        console.log("✅ Added new item"); // Debug log
+        console.log(" Added new item"); 
       }
     }
 
     await cart.save();
     
-    // Populate product details before sending response
+   
     await cart.populate("items.product_id");
     
-    console.log("✅ Cart saved successfully"); // Debug log
+    console.log(" Cart saved successfully"); 
     res.json({ success: true, message: "Product added to cart", cart });
   } catch (err) {
-    console.error("❌ Cart error:", err);
+    console.error(" Cart error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
